@@ -6,13 +6,13 @@
   <title>GA4 テスト用サイト</title>
 
   <!-- GA4 gtag.js（測定IDを G-XXXXXXXXXX から自分のIDに置き換えてください） -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-63CFYTMVDM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     // 基本設定（必要に応じて送信先IDを入れる）
-    gtag('config', 'G-XXXXXXXXXX'); // ← 測定IDに置換
+    gtag('config', 'G-63CFYTMVDM'); // ← 測定IDに置換
   </script>
 
   <style>
@@ -71,7 +71,7 @@
       const id = document.getElementById('childId').value.trim();
       if (!id) { alert('child_id を入力してください'); return; }
       // 設定の上書き（この後のヒットに user_id が付与されます）
-      gtag('config', 'G-XXXXXXXXXX', { user_id: id });
+      gtag('config', 'G-63CFYTMVDM', { user_id: id });
       document.getElementById('userIdMsg').innerHTML = '設定: user_id = <span class="ok">' + id + '</span>';
     }
 
