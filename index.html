@@ -3,17 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GA4 テスト用サイト（島3）</title>
+  <title>GA4 テスト用サイト</title>
 
-  <!-- GA4 gtag.js: 測定IDは G-63CFYTMVDM -->
+  <!-- GA4 gtag.js（測定IDを G-XXXXXXXXXX から自分のIDに置き換えてください） -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-63CFYTMVDM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
-    // 基本設定
-    gtag('config', 'G-63CFYTMVDM');
+    // 基本設定（必要に応じて送信先IDを入れる）
+    gtag('config', 'G-63CFYTMVDM'); // ← 測定IDに置換
   </script>
 
   <style>
@@ -21,56 +20,77 @@
     h1 { margin-bottom: 8px; }
     .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
     label { display:block; margin: 8px 0 4px; }
-    input { width: 260px; padding: 6px 8px; }
+    input { width: 240px; padding: 6px 8px; }
     button { padding: 8px 12px; margin-right: 8px; cursor: pointer; }
     .small { color:#666; font-size: 12px; }
     .ok { color: #066a00; }
   </style>
 </head>
 <body>
-  <h1>GA4 テストページ（島3）</h1>
-  <p>このページでは <strong>child_id（ユーザーID）</strong> と <strong>島3のクリア数・総ゲーム数</strong> を入力し、
-  <strong>island3_progress_percent</strong>（ユーザープロパティ）として GA4 に送信できます。</p>
+  <h1>GA4 テスト用ページ</h1>
+  <p>このページは <strong>ユーザーID設定</strong> と <strong>島1の進捗率（ユーザープロパティ）送信</strong>、<strong>カスタムイベント送信</strong> を試すための最小サンプルです。<br>
+  ブラウザのコンソールでも <code>gtag</code> を直接叩けます。</p>
 
   <div class="card">
     <h2>1) ユーザーIDを設定</h2>
-    <label>child_id（匿名ID。例: child_12345）</label>
+    <label>child_id（匿名ID）</label>
     <input id="childId" placeholder="例: child_12345" />
     <button onclick="setUserId()">ユーザーIDを設定</button>
     <div id="userIdMsg" class="small"></div>
   </div>
 
   <div class="card">
-    <h2>2) 島3の進捗を送信（ユーザープロパティ）</h2>
-    <label>クリア数 (i3_cleared)</label>
-    <input id="cleared3" type="number" value="0" min="0">
-
-    <label>総ゲーム数 (i3_total)</label>
-    <input id="total3" type="number" value="163" min="1">
-
+    <h2>2) 島1の進捗を送信（ユーザープロパティ）</h2>
+    <label>クリア数 (i1_cleared)</label>
+    <input id="cleared" type="number" value="7" min="0">
+    <label>総ゲーム数 (i1_total)</label>
+    <input id="total" type="number" value="163" min="1">
     <div class="small">進捗率 = (cleared / total * 100).toFixed(2)</div>
-    <button onclick="sendIsland3Progress()">進捗率を送信</button>
-    <div id="progressMsg3" class="small"></div>
+    <button onclick="sendIslandProgress()">進捗率を送信</button>
+    <div id="progressMsg" class="small"></div>
+  </div>
+
+  <div class="card">
+    <h2>3) カスタムイベント送信（任意）</h2>
+    <p>イベント名 <code>game_completed</code> を送ります（練習用）。</p>
+    <button onclick="sendEvent()">game_completed を送信</button>
+    <div id="eventMsg" class="small"></div>
+  </div>
+
+  <div class="card">
+    <h2>デバッグ方法</h2>
+    <ol>
+      <li>Chrome拡張「<a href='https://chromewebstore.google.com/detail/tag-assistant-legacy-by-go/glcapdcacdfkokcmicllhcjigeodacab' target='_blank' rel='noreferrer'>Tag Assistant</a>」を入れる（任意）。</li>
+      <li>GA4管理画面 → 左下「管理」→ プロパティ「デバッグビュー」を開く。</li>
+      <li>このページで操作すると、デバッグビューにイベント/ユーザープロパティが流れます。</li>
+    </ol>
   </div>
 
   <script>
     function setUserId() {
       const id = document.getElementById('childId').value.trim();
       if (!id) { alert('child_id を入力してください'); return; }
-      // この後のヒットに user_id が付与されます
+      // 設定の上書き（この後のヒットに user_id が付与されます）
       gtag('config', 'G-63CFYTMVDM', { user_id: id });
       document.getElementById('userIdMsg').innerHTML = '設定: user_id = <span class="ok">' + id + '</span>';
     }
 
-    function sendIsland3Progress() {
-      const cleared = Number(document.getElementById('cleared3').value);
-      const total = Number(document.getElementById('total3').value || 1);
+    function sendIslandProgress() {
+      const cleared = Number(document.getElementById('cleared').value);
+      const total = Number(document.getElementById('total').value || 1);
       const pct = (cleared / total * 100).toFixed(2);
+      gtag('set', 'user_properties', { island1_progress_percent: pct });
+      document.getElementById('progressMsg').innerHTML = '送信: island1_progress_percent = <span class="ok">' + pct + '%</span>';
+    }
 
-      gtag('set', 'user_properties', { island3_progress_percent: pct });
-
-      document.getElementById('progressMsg3').innerHTML =
-        '送信: island3_progress_percent = <span class="ok">' + pct + '%</span>';
+    function sendEvent() {
+      gtag('event', 'game_completed', {
+        content_id: 'game_01',
+        island_id: 'island_01',
+        attempt_count: 1,
+        learning_time_sec: 120
+      });
+      document.getElementById('eventMsg').innerHTML = '送信: event game_completed';
     }
   </script>
 </body>
