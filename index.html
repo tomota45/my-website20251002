@@ -5,31 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GA4 テスト用サイト</title>
 
-  <!-- GA4 gtag.js（測定IDを G-XXXXXXXXXX から自分のIDに置き換えてください） -->
+  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-63CFYTMVDM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    // 基本設定（必要に応じて送信先IDを入れる）
-    gtag('config', 'G-63CFYTMVDM'); // ← 測定IDに置換
+    gtag('config', 'G-63CFYTMVDM'); // 測定ID
   </script>
 
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans JP', sans-serif; margin: 24px; }
-    h1 { margin-bottom: 8px; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-    label { display:block; margin: 8px 0 4px; }
-    input { width: 240px; padding: 6px 8px; }
-    button { padding: 8px 12px; margin-right: 8px; cursor: pointer; }
-    .small { color:#666; font-size: 12px; }
-    .ok { color: #066a00; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding:16px; margin-bottom:16px; }
+    label { display:block; margin: 8px 0 4px; } input { width: 240px; padding: 6px 8px; }
+    button { padding:8px 12px; margin-right:8px; cursor:pointer; }
+    .small { color:#666; font-size:12px; } .ok { color:#066a00; }
   </style>
 </head>
 <body>
   <h1>GA4 テスト用ページ</h1>
-  <p>このページは <strong>ユーザーID設定</strong> と <strong>島1の進捗率（ユーザープロパティ）送信</strong>、<strong>カスタムイベント送信</strong> を試すための最小サンプルです。<br>
-  ブラウザのコンソールでも <code>gtag</code> を直接叩けます。</p>
+  <p>このページは <strong>ユーザーID設定</strong> と <strong>島1の進捗率（ユーザープロパティ）送信</strong>、
+     <strong>カスタムイベント送信</strong> を試すための最小サンプルです。</p>
 
   <div class="card">
     <h2>1) ユーザーIDを設定</h2>
@@ -40,7 +36,7 @@
   </div>
 
   <div class="card">
-    <h2>2) 島1の進捗を送信（ユーザープロパティ）</h2>
+    <h2>2) 島1の進捗を送信（ユーザープロパティ）＋イベント</h2>
     <label>クリア数 (i1_cleared)</label>
     <input id="cleared" type="number" value="7" min="0">
     <label>総ゲーム数 (i1_total)</label>
@@ -52,25 +48,15 @@
 
   <div class="card">
     <h2>3) カスタムイベント送信（任意）</h2>
-    <p>イベント名 <code>game_completed</code> を送ります（練習用）。</p>
+    <p>イベント名 <code>game_completed</code> を手動送信（練習用）。</p>
     <button onclick="sendEvent()">game_completed を送信</button>
     <div id="eventMsg" class="small"></div>
-  </div>
-
-  <div class="card">
-    <h2>デバッグ方法</h2>
-    <ol>
-      <li>Chrome拡張「<a href='https://chromewebstore.google.com/detail/tag-assistant-legacy-by-go/glcapdcacdfkokcmicllhcjigeodacab' target='_blank' rel='noreferrer'>Tag Assistant</a>」を入れる（任意）。</li>
-      <li>GA4管理画面 → 左下「管理」→ プロパティ「デバッグビュー」を開く。</li>
-      <li>このページで操作すると、デバッグビューにイベント/ユーザープロパティが流れます。</li>
-    </ol>
   </div>
 
   <script>
     function setUserId() {
       const id = document.getElementById('childId').value.trim();
       if (!id) { alert('child_id を入力してください'); return; }
-      // 設定の上書き（この後のヒットに user_id が付与されます）
       gtag('config', 'G-63CFYTMVDM', { user_id: id });
       document.getElementById('userIdMsg').innerHTML = '設定: user_id = <span class="ok">' + id + '</span>';
     }
@@ -79,8 +65,18 @@
       const cleared = Number(document.getElementById('cleared').value);
       const total = Number(document.getElementById('total').value || 1);
       const pct = (cleared / total * 100).toFixed(2);
+
+      // ユーザープロパティ（最新進捗）
       gtag('set', 'user_properties', { island1_progress_percent: pct });
-      document.getElementById('progressMsg').innerHTML = '送信: island1_progress_percent = <span class="ok">' + pct + '%</span>';
+
+      // 記録トリガーとしてイベントも送る
+      gtag('event', 'game_completed', {
+        island_id: 'island_01',
+        progress_percent: pct
+      });
+
+      document.getElementById('progressMsg').innerHTML =
+        '送信: island1_progress_percent = ' + pct + '%（game_completed も送信）';
     }
 
     function sendEvent() {
