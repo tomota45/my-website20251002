@@ -53,41 +53,42 @@
     <div id="eventMsg" class="small"></div>
   </div>
 
-  <script>
-    function setUserId() {
-      const id = document.getElementById('childId').value.trim();
-      if (!id) { alert('child_id を入力してください'); return; }
-      gtag('config', 'G-63CFYTMVDM', { user_id: id });
-      document.getElementById('userIdMsg').innerHTML = '設定: user_id = <span class="ok">' + id + '</span>';
-    }
+<script>
+  function setUserId() {
+    const id = document.getElementById('childId').value.trim();
+    if (!id) { alert('child_id を入力してください'); return; }
+    gtag('config', 'G-63CFYTMVDM', { user_id: id, debug_mode: true }); // ← debug_mode追加
+    document.getElementById('userIdMsg').innerHTML = '設定: user_id = <span class="ok">' + id + '</span>';
+  }
 
-    function sendIslandProgress() {
-      const cleared = Number(document.getElementById('cleared').value);
-      const total = Number(document.getElementById('total').value || 1);
-      const pct = (cleared / total * 100).toFixed(2);
+  function sendIslandProgress() {
+    const cleared = Number(document.getElementById('cleared').value);
+    const total = Number(document.getElementById('total').value || 1);
+    const pct = (cleared / total * 100).toFixed(2);
+    gtag('set', 'user_properties', { island1_progress_percent: pct });
 
-      // ユーザープロパティ（最新進捗）
-      gtag('set', 'user_properties', { island1_progress_percent: pct });
+    // debug_mode: true を付与
+    gtag('event', 'game_completed', {
+      content_id: 'game_01',
+      island_id: 'island_01',
+      attempt_count: 1,
+      learning_time_sec: 120,
+      debug_mode: true
+    });
 
-      // 記録トリガーとしてイベントも送る
-      gtag('event', 'game_completed', {
-        island_id: 'island_01',
-        progress_percent: pct
-      });
+    document.getElementById('progressMsg').innerHTML = '送信: island1_progress_percent = <span class="ok">' + pct + '%</span>';
+  }
 
-      document.getElementById('progressMsg').innerHTML =
-        '送信: island1_progress_percent = ' + pct + '%（game_completed も送信）';
-    }
-
-    function sendEvent() {
-      gtag('event', 'game_completed', {
-        content_id: 'game_01',
-        island_id: 'island_01',
-        attempt_count: 1,
-        learning_time_sec: 120
-      });
-      document.getElementById('eventMsg').innerHTML = '送信: event game_completed';
-    }
-  </script>
+  function sendEvent() {
+    gtag('event', 'game_completed', {
+      content_id: 'game_01',
+      island_id: 'island_01',
+      attempt_count: 1,
+      learning_time_sec: 120,
+      debug_mode: true
+    });
+    document.getElementById('eventMsg').innerHTML = '送信: event game_completed (debug_mode)';
+  }
+</script>
 </body>
 </html>
