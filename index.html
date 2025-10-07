@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GA4 テスト用ページ（島1～3対応）</title>
+  <title>GA4 テスト用ページ（user_id + child_id/島1〜3対応・修正版）</title>
 
+  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-63CFYTMVDM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
+    // 初期設定（ここでは user_id はまだ設定しない）
     gtag('config', 'G-63CFYTMVDM');
   </script>
 
@@ -18,20 +20,21 @@
     h1 { margin-bottom: 8px; }
     .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
     label { display:block; margin: 8px 0 4px; }
-    input { width: 240px; padding: 6px 8px; }
+    input { width: 260px; padding: 6px 8px; }
     button { padding: 8px 12px; margin-top: 6px; cursor: pointer; }
     .small { color:#666; font-size: 12px; margin-top: 6px; }
     .ok { color: #066a00; }
+    .muted { color:#999; font-size:12px; }
   </style>
 </head>
 <body>
-  <h1>GA4 テスト用ページ（島1～3対応）</h1>
-  <p>ユーザーIDを設定し、各島の進捗を送信できます。送信後はデバッグビューで確認してください。</p>
+  <h1>GA4 テスト用ページ（修正版 v1）</h1>
+  <p class="muted">手順：① child_id を設定 → ② 島の進捗を送信（任意の島）。DebugViewで <code>child_id</code> と進捗率が見えればOK。</p>
 
   <div class="card">
     <h2>1) ユーザーIDを設定</h2>
-    <label>child_id（匿名ID）</label>
-    <input id="childId" placeholder="例: child_12345" />
+    <label>child_id（匿名IDとして user_id に使用）</label>
+    <input id="childId" placeholder="例: child_0001" />
     <button onclick="setUserId()">ユーザーIDを設定</button>
     <div id="userIdMsg" class="small"></div>
   </div>
@@ -67,22 +70,35 @@
   </div>
 
   <script>
+    // 1) child_id を GA4 に設定（user_id と user_properties の両方に反映）
     function setUserId() {
       const id = document.getElementById('childId').value.trim();
       if (!id) { alert('child_id を入力してください'); return; }
-      gtag('config', 'G-63CFYTMVDM', { user_id: id, debug_mode: true });
-      document.getElementById('userIdMsg').innerHTML = '設定: user_id = <span class="ok">' + id + '</span>';
+
+      // user_id を設定（以降のヒットに付与）
+      gtag('config', 'G-63CFYTMVDM', { user_id: id });
+
+      // DebugView で確認しやすいよう user_properties にも保存
+      gtag('set', 'user_properties', { child_id: id });
+
+      document.getElementById('userIdMsg').innerHTML =
+        '設定: user_id / child_id = <span class="ok">' + id + '</span>';
+      console.log('✅ set user_id & child_id:', id);
     }
 
+    // 2) 島ごとの進捗送信（ユーザープロパティ + 記録用イベント）
     function sendIslandProgress(islandNum) {
       const cleared = Number(document.getElementById(`cleared${islandNum}`).value);
-      const total = Number(document.getElementById(`total${islandNum}`).value || 1);
+      const total = Math.max(1, Number(document.getElementById(`total${islandNum}`).value || 1));
       const pct = (cleared / total * 100).toFixed(2);
 
       const propName = `island${islandNum}_progress_percent`;
       const islandId = `island_0${islandNum}`;
 
+      // 最新進捗（ユーザープロパティ）
       gtag('set', 'user_properties', { [propName]: pct });
+
+      // 記録用イベント（DebugView ですぐ確認できる）
       gtag('event', 'game_completed', {
         island_id: islandId,
         [propName]: pct,
@@ -91,6 +107,7 @@
 
       document.getElementById(`progressMsg${islandNum}`).innerHTML =
         `送信: ${propName} = <span class="ok">${pct}%</span>`;
+      console.log(`✅ sent ${propName}:`, pct);
     }
   </script>
 </body>
