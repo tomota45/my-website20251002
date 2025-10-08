@@ -3,111 +3,133 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GA4 テスト用ページ（user_id + child_id/島1〜3対応・修正版）</title>
+  <title>GA4 手動イベント計測テスト（G-63CFYTMVDM）</title>
 
-  <!-- GA4 -->
+  <!-- ★あなたの計測ID -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-63CFYTMVDM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    // 初期設定（ここでは user_id はまだ設定しない）
-    gtag('config', 'G-63CFYTMVDM');
+    gtag('config', 'G-63CFYTMVDM', { send_page_view: true });
   </script>
 
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans JP', sans-serif; margin: 24px; }
-    h1 { margin-bottom: 8px; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-    label { display:block; margin: 8px 0 4px; }
-    input { width: 260px; padding: 6px 8px; }
-    button { padding: 8px 12px; margin-top: 6px; cursor: pointer; }
-    .small { color:#666; font-size: 12px; margin-top: 6px; }
-    .ok { color: #066a00; }
-    .muted { color:#999; font-size:12px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans JP', sans-serif; margin: 24px; line-height: 1.7; }
+    h1 { margin: 0 0 12px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    label { display:block; font-size: 12px; color:#374151; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 8px 10px; border:1px solid #e5e7eb; border-radius: 8px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { padding: 10px 14px; border: 0; border-radius: 10px; cursor: pointer; background: #111827; color: #fff; }
+    button.secondary { background:#4b5563; }
+    .muted { color:#6b7280; font-size: 12px; }
+    .ok { color:#065f46; }
   </style>
 </head>
 <body>
-  <h1>GA4 テスト用ページ（修正版 v1）</h1>
-  <p class="muted">手順：① child_id を設定 → ② 島の進捗を送信（任意の島）。DebugViewで <code>child_id</code> と進捗率が見えればOK。</p>
+  <h1>GA4 手動イベント計測テスト</h1>
+  <p class="muted">学習開始・終了イベントを手動で送信して、DebugViewで <code>game_started</code> / <code>game_completed</code> を確認できます。</p>
 
-  <div class="card">
-    <h2>1) ユーザーIDを設定</h2>
-    <label>child_id（匿名IDとして user_id に使用）</label>
-    <input id="childId" placeholder="例: child_0001" />
-    <button onclick="setUserId()">ユーザーIDを設定</button>
-    <div id="userIdMsg" class="small"></div>
-  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>共通パラメータ</h3>
+      <div class="row">
+        <div><label>child_id</label><input id="child_id" placeholder="例: child_0001"></div>
+        <div><label>content_id</label><input id="content_id" placeholder="例: game_001"></div>
+      </div>
+      <div class="row">
+        <div><label>type_id</label><input id="type_id" placeholder="例: mimicme"></div>
+        <div><label>cat_id</label><input id="cat_id" placeholder="例: pronunciation"></div>
+      </div>
+      <div class="row">
+        <div><label>island_id（任意）</label><input id="island_id" placeholder="例: 1"></div>
+        <div><label>attempt_count（終了時）</label><input id="attempt_count" type="number" value="1" min="1"></div>
+      </div>
+      <div class="row">
+        <div><label>invalid_flag（0=正常 / 1=異常）</label>
+          <select id="invalid_flag"><option value="0">0</option><option value="1">1</option></select>
+        </div>
+        <div><label>learning_time_sec（任意）</label><input id="learning_time_sec" type="number" placeholder="秒単位"></div>
+      </div>
+      <p id="status" class="muted"></p>
+    </div>
 
-  <div class="card">
-    <h2>2) 島1の進捗送信</h2>
-    <label>クリア数 (i1_cleared)</label>
-    <input id="cleared1" type="number" value="7" min="0">
-    <label>総ゲーム数 (i1_total)</label>
-    <input id="total1" type="number" value="163" min="1">
-    <button onclick="sendIslandProgress(1)">島1の進捗を送信</button>
-    <div id="progressMsg1" class="small"></div>
-  </div>
-
-  <div class="card">
-    <h2>3) 島2の進捗送信</h2>
-    <label>クリア数 (i2_cleared)</label>
-    <input id="cleared2" type="number" value="0" min="0">
-    <label>総ゲーム数 (i2_total)</label>
-    <input id="total2" type="number" value="163" min="1">
-    <button onclick="sendIslandProgress(2)">島2の進捗を送信</button>
-    <div id="progressMsg2" class="small"></div>
-  </div>
-
-  <div class="card">
-    <h2>4) 島3の進捗送信</h2>
-    <label>クリア数 (i3_cleared)</label>
-    <input id="cleared3" type="number" value="0" min="0">
-    <label>総ゲーム数 (i3_total)</label>
-    <input id="total3" type="number" value="163" min="1">
-    <button onclick="sendIslandProgress(3)">島3の進捗を送信</button>
-    <div id="progressMsg3" class="small"></div>
+    <div class="card">
+      <h3>アクション</h3>
+      <div class="row">
+        <button onclick="onStart()">学習開始（game_started）</button>
+        <button class="secondary" onclick="onEnd()">学習終了（game_completed）</button>
+      </div>
+      <p class="muted">開始クリックで <code>start_time</code> を記録。終了時に <code>end_time</code> と学習時間を自動計算します。</p>
+    </div>
   </div>
 
   <script>
-    // 1) child_id を GA4 に設定（user_id と user_properties の両方に反映）
-    function setUserId() {
-      const id = document.getElementById('childId').value.trim();
-      if (!id) { alert('child_id を入力してください'); return; }
+    const MEAS_ID = 'G-63CFYTMVDM';
+    const startMap = new Map();
+    const nowIso = () => new Date().toISOString();
+    const read = id => document.getElementById(id).value.trim();
+    const setStatus = (msg, ok=false) => {
+      const el = document.getElementById('status');
+      el.innerHTML = ok ? '<span class="ok">✅ '+msg+'</span>' : msg;
+    };
 
-      // user_id を設定（以降のヒットに付与）
-      gtag('config', 'G-63CFYTMVDM', { user_id: id });
-
-      // DebugView で確認しやすいよう user_properties にも保存
-      gtag('set', 'user_properties', { child_id: id });
-
-      document.getElementById('userIdMsg').innerHTML =
-        '設定: user_id / child_id = <span class="ok">' + id + '</span>';
-      console.log('✅ set user_id & child_id:', id);
+    function validateCommon(){
+      const c = {
+        child_id: read('child_id'),
+        content_id: read('content_id'),
+        type_id: read('type_id'),
+        cat_id: read('cat_id')
+      };
+      if(Object.values(c).some(v=>!v)){
+        alert('child_id / content_id / type_id / cat_id を入力してください');
+        return null;
+      }
+      return c;
     }
 
-    // 2) 島ごとの進捗送信（ユーザープロパティ + 記録用イベント）
-    function sendIslandProgress(islandNum) {
-      const cleared = Number(document.getElementById(`cleared${islandNum}`).value);
-      const total = Math.max(1, Number(document.getElementById(`total${islandNum}`).value || 1));
-      const pct = (cleared / total * 100).toFixed(2);
-
-      const propName = `island${islandNum}_progress_percent`;
-      const islandId = `island_0${islandNum}`;
-
-      // 最新進捗（ユーザープロパティ）
-      gtag('set', 'user_properties', { [propName]: pct });
-
-      // 記録用イベント（DebugView ですぐ確認できる）
-      gtag('event', 'game_completed', {
-        island_id: islandId,
-        [propName]: pct,
+    function onStart(){
+      const c = validateCommon();
+      if(!c) return;
+      const island_id = read('island_id') || undefined;
+      const start_time = nowIso();
+      startMap.set(c.content_id, start_time);
+      gtag('event', 'game_started', {
+        ...c,
+        ...(island_id ? { island_id } : {}),
+        start_time,
         debug_mode: true
       });
+      setStatus(`game_started 送信: ${c.content_id} (${start_time})`, true);
+      console.log('[GA] game_started sent', c);
+    }
 
-      document.getElementById(`progressMsg${islandNum}`).innerHTML =
-        `送信: ${propName} = <span class="ok">${pct}%</span>`;
-      console.log(`✅ sent ${propName}:`, pct);
+    function onEnd(){
+      const c = validateCommon();
+      if(!c) return;
+      const island_id = read('island_id') || undefined;
+      const end_time = nowIso();
+      let start_time = startMap.get(c.content_id) || end_time;
+      const manualSec = Number(read('learning_time_sec'));
+      const learning_time_sec = manualSec > 0 ? manualSec :
+        Math.max(0, Math.round((new Date(end_time) - new Date(start_time)) / 1000));
+      const attempt_count = Math.max(1, Number(read('attempt_count')) || 1);
+      const invalid_flag = Number(read('invalid_flag')) || 0;
+
+      gtag('event', 'game_completed', {
+        ...c,
+        ...(island_id ? { island_id } : {}),
+        start_time,
+        end_time,
+        attempt_count,
+        learning_time_sec,
+        invalid_flag,
+        debug_mode: true
+      });
+      setStatus(`game_completed 送信: ${c.content_id} (${learning_time_sec}s)`, true);
+      console.log('[GA] game_completed sent', c);
     }
   </script>
 </body>
